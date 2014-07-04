@@ -1,0 +1,44 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    
+    var db = Database.Open("TennisNew1");
+    var selectCommand = "SELECT * FROM Players";
+    var searchTerm = "";
+
+    if (!Request.QueryString["searchPlayer"].IsEmpty() ) {
+        selectCommand = "SELECT * FROM Players WHERE FirstName LIKE @0";
+        searchTerm = "%" + Request.QueryString["SearchPlayer"] + "%";
+    }
+
+    var selectedData = db.Query(selectCommand, searchTerm);
+    var grid = new WebGrid(source: selectedData, defaultSort: "LastName", rowsPerPage: 20);
+}
+
+        <h2>List Players</h2>
+        <form method="get">
+            <div>
+                <label for="SearchPlayer">Search players:</label>
+                <input type="text" name="SearchPlayer" value="@Request.QueryString["SearchPlayer"]" />
+                <input type="submit" value="Search Player" /><br/>
+            </div>
+        </form>
+        <div>
+            @grid.GetHtml(
+                tableStyle: "grid",
+                headerStyle: "head",
+                alternatingRowStyle: "alt",
+                columns: grid.Columns(
+                    grid.Column(format: @<a href="~/EditPlayer?id=@item.ID">Edit</a>),
+                    grid.Column("FirstName"),
+                    grid.Column("LastName"),
+                    grid.Column("TelephoneNumber"),
+                    grid.Column("DOB"),
+                    grid.Column(format: @<a href="~/DeletePlayer?id=@item.ID">Delete</a>)
+                )
+            )
+        </div>
+        <p>
+            <a href="~/AddPlayer">Add a player</a>
+        </p>
+    </body>
+</html>

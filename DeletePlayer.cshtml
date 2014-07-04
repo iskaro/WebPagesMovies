@@ -1,0 +1,72 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = "Delete a Player";
+
+    var firstName = "";
+    var lastName = "";
+    var telephoneNumber = "";
+    var dob = "";
+    var playerId = "";
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["ID"].IsEmpty())
+        {
+            playerId = Request.QueryString["ID"];
+            var db = Database.Open("TennisNew1");
+            var dbCommand = "SELECT * FROM Players WHERE ID = @0";
+            var row = db.QuerySingle(dbCommand, playerId);
+            firstName = row.FirstName;
+            lastName = row.LastName;
+            telephoneNumber = row.TelephoneNumber;
+            dob = row.DOB.ToString("yyyy-MM-dd");
+        }
+        else
+        {
+            Validation.AddFormError("No player was selected.");
+        }
+    }
+
+    if (IsPost && !Request["buttonDelete"].IsEmpty())
+    {
+        playerId = Request.Form["playerId"];
+        var db = Database.Open("TennisNew1");
+        var deleteCommand = "DELETE FROM Players WHERE ID = @0";
+        db.Execute(deleteCommand, playerId);
+        Response.Redirect("~/Players");
+    }
+
+}
+
+<h2>Delete a Player</h2>
+@Html.ValidationSummary()
+<p><a href="~/Players">Return to player listing</a></p>
+
+<form method="post">
+    <fieldset>
+        <legend>Player Information</legend>
+
+        <p>
+            <span>First Name:</span>
+            <span>@firstName</span>
+        </p>
+
+        <p>
+            <span>Last Name:</span>
+            <span>@lastName</span>
+        </p>
+
+        <p>
+            <span>Telephone number:</span>
+            <span>@telephoneNumber</span>
+        </p>
+
+        <p>
+            <span>Day of birth:</span>
+            <span>@dob</span>
+        </p>
+
+        <input type="hidden" name="playerId" value="@playerId" />
+        <p><input type="submit" name="buttonDelete" value="Delete Player" /></p>
+    </fieldset>
+</form>
